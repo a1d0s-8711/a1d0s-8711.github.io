@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>время и сезоны</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            height: 100vh;
+            transition: background 2s ease;
+        }
+
+        .scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Sky */
+        .sky {
+            position: absolute;
+            width: 100%;
+            height: 70%;
+            top: 0;
+            transition: background 2s ease;
+        }
+
+        /* Ground */
+        .ground {
+            position: absolute;
+            width: 100%;
+            height: 30%;
+            bottom: 0;
+            transition: background 2s ease;
+        }
+
+        /* Sun */
+        .sun {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fffb00 0%, #ffdb00 40%, #ff8c00 100%);
+            box-shadow: 0 0 60px rgba(255, 200, 0, 0.8), 0 0 120px rgba(255, 200, 0, 0.4);
+            transition: all 2s ease;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Moon */
+        .moon {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff 0%, #e0e0e0 100%);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.6), 0 0 80px rgba(255, 255, 255, 0.3);
+            transition: all 2s ease;
+        }
+
+        .moon::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(200, 200, 200, 0.4);
+            border-radius: 50%;
+            top: 25%;
+            left: 30%;
+        }
+
+        .moon::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: rgba(200, 200, 200, 0.3);
+            border-radius: 50%;
+            top: 55%;
+            left: 60%;
+        }
+
+        /* Stars */
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 100px;
+            animation: float 60s linear infinite;
+        }
+
+        @keyframes float {
+            from { transform: translateX(-200px); }
+            to { transform: translateX(calc(100vw + 200px)); }
+        }
+
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 100px;
+        }
+
+        /* House */
+        .house {
+            position: absolute;
+            bottom: 32%;
+            right: 25%;
+            transform: translateX(50%);
+            z-index: 3;
+            filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.4));
+        }
+
+        .house-body {
+            width: 220px;
+            height: 160px;
+            background: linear-gradient(135deg, #D2691E 0%, #8B4513 50%, #654321 100%);
+            position: relative;
+            border-radius: 2px;
+            transition: background 2s ease;
+        }
+
+        .house-body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background:
+                    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(0,0,0,0.1) 18px, rgba(0,0,0,0.1) 22px),
+                    repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(0,0,0,0.08) 18px, rgba(0,0,0,0.08) 20px);
+            border-radius: 2px;
+        }
+
+        .house-body::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(0,0,0,0.3));
+        }
+
+        .house-roof {
+            width: 280px;
+            height: 90px;
+            background: linear-gradient(175deg, #8B4513 0%, #654321 50%, #4a2f1a 100%);
+            position: absolute;
+            top: -85px;
+            left: -30px;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            filter: drop-shadow(-3px -3px 8px rgba(0, 0, 0, 0.3));
+            transition: background 2s ease;
+        }
+
+        .house-roof::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                    145deg,
+                    transparent,
+                    transparent 15px,
+                    rgba(0,0,0,0.15) 15px,
+                    rgba(0,0,0,0.15) 17px
+            );
+        }
+
+        .house-roof::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(to bottom, #5a3a1a, #3a2410);
+            clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);
+        }
+
+        .chimney {
+            width: 35px;
+            height: 60px;
+            background: linear-gradient(135deg, #B22222 0%, #8B0000 50%, #660000 100%);
+            position: absolute;
+            top: -110px;
+            right: 50px;
+            box-shadow: -3px -3px 8px rgba(0, 0, 0, 0.3);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .chimney::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 8px,
+                    rgba(0,0,0,0.2) 8px,
+                    rgba(0,0,0,0.2) 10px
+            );
+        }
+
+        .chimney::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -3px;
+            width: calc(100% + 6px);
+            height: 10px;
+            background: linear-gradient(to bottom, #A52A2A, #8B0000);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .smoke {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, rgba(220, 220, 220, 0.7) 0%, rgba(200, 200, 200, 0.4) 50%, transparent 100%);
+            border-radius: 50%;
+            top: -120px;
+            right: 57px;
+            animation: rise 4s ease-out infinite;
+            filter: blur(2px);
+        }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-50px) translateX(10px) scale(1.5);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) translateX(-5px) scale(2);
+                opacity: 0;
+            }
+        }
+
+        .door {
+            width: 55px;
+            height: 95px;
+            background: linear-gradient(to right, #5c3317 0%, #3d2210 50%, #2b1607 100%);
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px 8px 0 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), inset 3px 0 5px rgba(255,255,255,0.1);
+        }
+
+        .door::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 15px,
+                    rgba(0,0,0,0.3) 15px,
+                    rgba(0,0,0,0.3) 17px
+            );
+            border-radius: 8px 8px 0 0;
+        }
+
+        .door-knob {
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 30% 30%, #FFD700, #DAA520);
+            border-radius: 50%;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset -1px -1px 2px rgba(0,0,0,0.3);
+        }
+
+        .window {
+            width: 50px;
+            height: 55px;
+            background: #87CEEB;
+            position: absolute;
+            border: 5px solid #5c3317;
+            transition: background 2s ease, box-shadow 2s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            border-radius: 2px;
+        }
+
+        .window-left {
+            top: 30px;
+            left: 25px;
+        }
+
+        .window-right {
+            top: 30px;
+            right: 25px;
+        }
+
+        .window::before {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to right, #4a2f1a, #5c3317, #4a2f1a);
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .window::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to bottom, #4a2f1a, #5c3317, #4a2f1a);
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .window-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 2s ease;
+            pointer-events: none;
+        }
+
+        /* Trees - Realistic version */
+        .tree {
+            position: absolute;
+            bottom: 30%;
+            z-index: 2;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
+        }
+
+        .tree-trunk {
+            width: 50px;
+            height: 120px;
+            background: linear-gradient(to right, #3d2817 0%, #5c3d2e 30%, #4a3425 70%, #3d2817 100%);
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px 5px 0 0;
+            box-shadow: inset -5px 0 10px rgba(0,0,0,0.4), inset 5px 0 10px rgba(255,255,255,0.05);
+        }
+
+        .tree-trunk::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background:
+                    repeating-linear-gradient(90deg, transparent 0px, transparent 8px, rgba(0,0,0,0.15) 8px, rgba(0,0,0,0.15) 9px),
+                    repeating-linear-gradient(180deg, transparent 0px, transparent 15px, rgba(0,0,0,0.1) 15px, rgba(0,0,0,0.1) 17px);
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* Pine tree crown */
+        .tree-crown {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pine-layer {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            transition: filter 2s ease;
+        }
+
+        .pine-layer-1 {
+            width: 180px;
+            height: 100px;
+            background: linear-gradient(to bottom, #1a5f1a 0%, #0d4d0d 100%);
+            bottom: 0;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .pine-layer-2 {
+            width: 160px;
+            height: 90px;
+            background: linear-gradient(to bottom, #267326 0%, #1a5f1a 100%);
+            bottom: 70px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .pine-layer-3 {
+            width: 130px;
+            height: 80px;
+            background: linear-gradient(to bottom, #2d8b2d 0%, #228b22 100%);
+            bottom: 135px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .pine-layer-4 {
+            width: 100px;
+            height: 70px;
+            background: linear-gradient(to bottom, #32a032 0%, #2d8b2d 100%);
+            bottom: 190px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .pine-layer-5 {
+            width: 70px;
+            height: 60px;
+            background: linear-gradient(to bottom, #3cb371 0%, #32a032 100%);
+            bottom: 240px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        /* Add texture to pine */
+        .pine-layer::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                    135deg,
+                    transparent,
+                    transparent 8px,
+                    rgba(0,0,0,0.1) 8px,
+                    rgba(0,0,0,0.1) 10px
+            );
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        /* Particles */
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        .leaf {
+            width: 20px;
+            height: 20px;
+            opacity: 0.8;
+            animation: fall-rotate linear infinite;
+        }
+
+        .snowflake {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.9;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .blossom {
+            width: 15px;
+            height: 15px;
+            opacity: 0.8;
+            animation: fall-sway linear infinite;
+        }
+
+        .raindrop {
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.8));
+            opacity: 0.6;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+
+        @keyframes fall-rotate {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+
+        @keyframes fall-sway {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); }
+            25% { transform: translateY(25vh) translateX(20px) rotate(90deg); }
+            50% { transform: translateY(50vh) translateX(0) rotate(180deg); }
+            75% { transform: translateY(75vh) translateX(-20px) rotate(270deg); }
+            100% { transform: translateY(100vh) translateX(0) rotate(360deg); }
+        }
+
+        /* Content */
+        .content {
+            position: relative;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .time-display {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 2rem 2.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1.5s ease-out;
+            text-align: center;
+        }
+
+        #clock {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #date {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+        }
+
+        .info-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            animation: fadeInUp 1.5s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .info-card:hover {
+            transform: translateX(10px);
+        }
+
+        .info-icon {
+            font-size: 3rem;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+        }
+
+        .season-description {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 1rem;
+            line-height: 1.6;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            text-align: center;
+        }
+
+        .right-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+        }
+
+        @media (max-width: 1200px) {
+            .content {
+                grid-template-columns: 1fr;
+                padding-top: 2rem;
+            }
+
+            .left-panel {
+                order: 1;
+            }
+
+            .right-panel {
+                order: 2;
+                display: none;
+            }
+
+            .house {
+                right: 50%;
+                transform: translateX(50%);
+            }
+        }
+
+        @media (max-width: 768px) {
+            #clock { font-size: 3rem; }
+            #date { font-size: 1.1rem; }
+            .time-display { padding: 1.5rem 2rem; }
+            .info-card { padding: 1rem; }
+            .info-icon { font-size: 2.5rem; }
+            .info-value { font-size: 1.3rem; }
+            .house-body { width: 150px; height: 110px; }
+            .house-roof { width: 190px; height: 60px; top: -58px; left: -20px; }
+            .tree { transform: scale(0.7); }
+            .sun, .moon { width: 80px; height: 80px; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<div class="scene">
+    <div class="sky" id="sky">
+        <div id="celestial-body"></div>
+        <div id="stars-container"></div>
+        <div id="clouds-container"></div>
+    </div>
+    <div class="ground" id="ground"></div>
+
+    <div class="house">
+        <div class="chimney"></div>
+        <div class="smoke"></div>
+        <div class="smoke" style="animation-delay: 1.3s;"></div>
+        <div class="smoke" style="animation-delay: 2.6s;"></div>
+        <div class="house-roof"></div>
+        <div class="house-body">
+            <div class="window window-left">
+                <div class="window-glow"></div>
+            </div>
+            <div class="window window-right">
+                <div class="window-glow"></div>
+            </div>
+            <div class="door">
+                <div class="door-knob"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tree" style="right: 55%; bottom: 32%;">
+        <div class="tree-trunk"></div>
+        <div class="tree-crown">
+            <div class="pine-layer pine-layer-1"></div>
+            <div class="pine-layer pine-layer-2"></div>
+            <div class="pine-layer pine-layer-3"></div>
+            <div class="pine-layer pine-layer-4"></div>
+            <div class="pine-layer pine-layer-5"></div>
+        </div>
+    </div>
+
+    <div class="tree" style="right: 10%; bottom: 30%;">
+        <div class="tree-trunk"></div>
+        <div class="tree-crown">
+            <div class="pine-layer pine-layer-1"></div>
+            <div class="pine-layer pine-layer-2"></div>
+            <div class="pine-layer pine-layer-3"></div>
+            <div class="pine-layer pine-layer-4"></div>
+            <div class="pine-layer pine-layer-5"></div>
+        </div>
+    </div>
+</div>
+
+<div id="particles-container"></div>
+
+<div class="content">
+    <div class="left-panel">
+        <div class="time-display">
+            <div id="clock">00:00:00</div>
+            <div id="date">Загрузка...</div>
+        </div>
+
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-icon" id="season-icon">🍂</div>
+                <div class="info-content">
+                    <div class="info-label">Сезон</div>
+                    <div class="info-value" id="season-name">Осень</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon" id="time-icon">🌅</div>
+                <div class="info-content">
+                    <div class="info-label">Время суток</div>
+                    <div class="info-value" id="time-period">Утро</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">🗓️️</div>
+                <div class="info-content">
+                    <div class="info-label">День года</div>
+                    <div class="info-value" id="day-of-year">1</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="season-description" id="description">
+            Наблюдайте, как меняется атмосфера в зависимости от времени суток и сезона
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <!-- Визуальная сцена справа -->
+    </div>
+</div>
+
+<script>
+    const particlesContainer = document.getElementById('particles-container');
+    const sky = document.getElementById('sky');
+    const ground = document.getElementById('ground');
+    const celestialBody = document.getElementById('celestial-body');
+    const starsContainer = document.getElementById('stars-container');
+    const cloudsContainer = document.getElementById('clouds-container');
+
+    const seasons = {
+        winter: {
+            name: 'Зима',
+            icon: '❄️',
+            months: [11, 0, 1],
+            particle: 'snowflake',
+            particleCount: 120,
+            treeColor: '#1a4d2e',
+            groundColor: '#E8F5E9',
+            times: {
+                night: {
+                    skyGradient: 'linear-gradient(to bottom, #0a1128 0%, #1c2541 50%, #2a4494 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #c5d9e8 0%, #e8f1f5 100%)',
+                    celestial: 'moon',
+                    celestialPos: { top: '15%', right: '20%' },
+                    desc: 'Морозная зимняя ночь со звездами',
+                    showStars: true
+                },
+                morning: {
+                    skyGradient: 'linear-gradient(to bottom, #87CEEB 0%, #B0D4E3 50%, #E0F2F7 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #E8F4F8 0%, #F0F8FF 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '20%', left: '15%' },
+                    desc: 'Свежее морозное утро'
+                },
+                day: {
+                    skyGradient: 'linear-gradient(to bottom, #4A90E2 0%, #87CEEB 50%, #B4D7E9 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #F0F8FF 0%, #FFFFFF 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '10%', left: '50%', transform: 'translateX(-50%)' },
+                    desc: 'Ясный солнечный зимний день'
+                },
+                evening: {
+                    skyGradient: 'linear-gradient(to bottom, #FF6B9D 0%, #C06C84 50%, #6C5B7B 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #D4E5F2 0%, #E8F4F8 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '50%', right: '10%' },
+                    desc: 'Розовый зимний закат'
+                }
+            }
+        },
+        spring: {
+            name: 'Весна',
+            icon: '🌸',
+            months: [2, 3, 4],
+            particle: 'blossom',
+            particleCount: 70,
+            treeColor: '#90EE90',
+            groundColor: '#98D8C8',
+            times: {
+                night: {
+                    skyGradient: 'linear-gradient(to bottom, #1a1a3e 0%, #2a4365 50%, #4a5568 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #2d5016 0%, #4a7c59 100%)',
+                    celestial: 'moon',
+                    celestialPos: { top: '15%', right: '20%' },
+                    desc: 'Теплая весенняя ночь',
+                    showStars: true
+                },
+                morning: {
+                    skyGradient: 'linear-gradient(to bottom, #ffeaa7 0%, #fdcb6e 50%, #ff7675 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #55efc4 0%, #a8e6cf 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '20%', left: '15%' },
+                    desc: 'Нежное весеннее утро с росой'
+                },
+                day: {
+                    skyGradient: 'linear-gradient(to bottom, #74b9ff 0%, #a29bfe 50%, #fd79a8 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #6ab04c 0%, #badc58 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '10%', left: '50%', transform: 'translateX(-50%)' },
+                    desc: 'Цветущий весенний день'
+                },
+                evening: {
+                    skyGradient: 'linear-gradient(to bottom, #fd79a8 0%, #fdcb6e 50%, #e17055 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #4a7c59 0%, #6ab04c 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '50%', right: '10%' },
+                    desc: 'Романтичный весенний закат'
+                }
+            }
+        },
+        summer: {
+            name: 'Лето',
+            icon: '☀️',
+            months: [5, 6, 7],
+            particle: 'raindrop',
+            particleCount: 0,
+            treeColor: '#228B22',
+            groundColor: '#7CB342',
+            times: {
+                night: {
+                    skyGradient: 'linear-gradient(to bottom, #0c0032 0%, #190061 50%, #240090 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #1a472a 0%, #2d5016 100%)',
+                    celestial: 'moon',
+                    celestialPos: { top: '15%', right: '20%' },
+                    desc: 'Теплая летняя ночь',
+                    showStars: true
+                },
+                morning: {
+                    skyGradient: 'linear-gradient(to bottom, #ffeaa7 0%, #74b9ff 50%, #81ecec 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #6ab04c 0%, #badc58 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '20%', left: '15%' },
+                    desc: 'Свежее летнее утро'
+                },
+                day: {
+                    skyGradient: 'linear-gradient(to bottom, #00b4db 0%, #0083b0 50%, #74b9ff 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #7cb342 0%, #8bc34a 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '10%', left: '50%', transform: 'translateX(-50%)' },
+                    desc: 'Жаркий солнечный летний день'
+                },
+                evening: {
+                    skyGradient: 'linear-gradient(to bottom, #ff6b6b 0%, #feca57 50%, #ee5a6f 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #6ab04c 0%, #7cb342 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '50%', right: '10%' },
+                    desc: 'Яркий летний закат'
+                }
+            }
+        },
+        autumn: {
+            name: 'Осень',
+            icon: '🍂',
+            months: [8, 9, 10],
+            particle: 'leaf',
+            particleCount: 80,
+            treeColor: '#FF8C00',
+            groundColor: '#CD853F',
+            times: {
+                night: {
+                    skyGradient: 'linear-gradient(to bottom, #2c3e50 0%, #34495e 50%, #4a5568 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #5d4037 0%, #6d4c41 100%)',
+                    celestial: 'moon',
+                    celestialPos: { top: '15%', right: '20%' },
+                    desc: 'Прохладная осенняя ночь',
+                    showStars: true
+                },
+                morning: {
+                    skyGradient: 'linear-gradient(to bottom, #fa709a 0%, #fee140 50%, #ffa751 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #d4a574 0%, #cd853f 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '20%', left: '15%' },
+                    desc: 'Туманное осеннее утро'
+                },
+                day: {
+                    skyGradient: 'linear-gradient(to bottom, #f9d423 0%, #ff4e50 50%, #fc913a 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #cd853f 0%, #d2691e 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '10%', left: '50%', transform: 'translateX(-50%)' },
+                    desc: 'Золотой осенний день'
+                },
+                evening: {
+                    skyGradient: 'linear-gradient(to bottom, #ee9ca7 0%, #ffdde1 50%, #ff6b6b 100%)',
+                    groundGradient: 'linear-gradient(to bottom, #8b4513 0%, #a0522d 100%)',
+                    celestial: 'sun',
+                    celestialPos: { top: '50%', right: '10%' },
+                    desc: 'Багряный осенний закат'
+                }
+            }
+        }
+    };
+
+    function getCurrentSeason(month) {
+        for (let season in seasons) {
+            if (seasons[season].months.includes(month)) {
+                return seasons[season];
+            }
+        }
+        return seasons.autumn;
+    }
+
+    function getTimeOfDay(hour) {
+        if (hour >= 0 && hour < 6) return 'night';
+        if (hour >= 6 && hour < 12) return 'morning';
+        if (hour >= 12 && hour < 18) return 'day';
+        return 'evening';
+    }
+
+    function getTimeOfDayName(timeOfDay) {
+        const names = {
+            night: '🌙 Ночь',
+            morning: '🌅 Утро',
+            day: '☀️ День',
+            evening: '🌆 Вечер'
+        };
+        return names[timeOfDay];
+    }
+
+    function createStars() {
+        starsContainer.innerHTML = '';
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 60 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+    }
+
+    function createClouds() {
+        cloudsContainer.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            const size = 60 + Math.random() * 40;
+            cloud.style.width = size + 'px';
+            cloud.style.height = size * 0.6 + 'px';
+            cloud.style.top = Math.random() * 40 + 10 + '%';
+            cloud.style.left = Math.random() * 100 + '%';
+            cloud.style.animationDuration = (40 + Math.random() * 40) + 's';
+            cloud.style.animationDelay = Math.random() * 10 + 's';
+
+            const before = document.createElement('div');
+            before.style.width = size * 0.6 + 'px';
+            before.style.height = size * 0.5 + 'px';
+            before.style.left = '-' + size * 0.3 + 'px';
+            before.style.top = size * 0.1 + 'px';
+            cloud.appendChild(before);
+
+            const after = document.createElement('div');
+            after.style.width = size * 0.5 + 'px';
+            after.style.height = size * 0.4 + 'px';
+            after.style.right = '-' + size * 0.2 + 'px';
+            after.style.top = size * 0.15 + 'px';
+            cloud.appendChild(after);
+
+            cloudsContainer.appendChild(cloud);
+        }
+    }
+
+    function updateCelestialBody(type, position) {
+        celestialBody.className = type;
+        celestialBody.style.top = position.top || 'auto';
+        celestialBody.style.bottom = position.bottom || 'auto';
+        celestialBody.style.left = position.left || 'auto';
+        celestialBody.style.right = position.right || 'auto';
+        celestialBody.style.transform = position.transform || 'none';
+    }
+
+    function createParticle(type) {
+        const particle = document.createElement('div');
+        particle.className = `particle ${type}`;
+
+        const startX = Math.random() * window.innerWidth;
+        const duration = 5 + Math.random() * 10;
+        const delay = Math.random() * 5;
+        const size = 0.5 + Math.random() * 1.5;
+
+        particle.style.left = startX + 'px';
+        particle.style.top = '-50px';
+        particle.style.animationDuration = duration + 's';
+        particle.style.animationDelay = delay + 's';
+        particle.style.transform = `scale(${size})`;
+
+        if (type === 'leaf') {
+            const colors = ['🍂', '🍁', '🌿'];
+            particle.textContent = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.fontSize = '20px';
+        } else if (type === 'blossom') {
+            const colors = ['🌸', '🌺', '🌼'];
+            particle.textContent = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.fontSize = '15px';
+        }
+
+        particlesContainer.appendChild(particle);
+
+        particle.addEventListener('animationiteration', () => {
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+        });
+    }
+
+    function updateParticles(particleType, count) {
+        particlesContainer.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => createParticle(particleType), i * 100);
+        }
+    }
+
+    function getDayOfYear(date) {
+        const start = new Date(date.getFullYear(), 0, 0);
+        const diff = date - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        return Math.floor(diff / oneDay);
+    }
+
+    function updateScene(season, timeOfDay, timeConfig) {
+        sky.style.background = timeConfig.skyGradient;
+        ground.style.background = timeConfig.groundGradient;
+
+        if (timeConfig.showStars) {
+            starsContainer.style.opacity = '1';
+            if (starsContainer.children.length === 0) createStars();
+        } else {
+            starsContainer.style.opacity = '0';
+        }
+
+        updateCelestialBody(timeConfig.celestial, timeConfig.celestialPos);
+
+        // Update pine trees color
+        const pineLayers = document.querySelectorAll('.pine-layer');
+        pineLayers.forEach((layer, index) => {
+            const baseColors = {
+                winter: ['#1a5f1a', '#267326', '#2d8b2d', '#32a032', '#3cb371'],
+                spring: ['#32cd32', '#3cb371', '#90ee90', '#98fb98', '#adff2f'],
+                summer: ['#228b22', '#2e8b57', '#3cb371', '#66cdaa', '#8fbc8f'],
+                autumn: ['#b8860b', '#cd853f', '#daa520', '#f0e68c', '#ffd700']
+            };
+
+            const colors = baseColors[season.name === 'Зима' ? 'winter' :
+                season.name === 'Весна' ? 'spring' :
+                    season.name === 'Лето' ? 'summer' : 'autumn'];
+
+            if (colors && colors[index]) {
+                const darkerColor = adjustBrightness(colors[index], -20);
+                layer.style.background = `linear-gradient(to bottom, ${colors[index]}, ${darkerColor})`;
+            }
+        });
+
+        function adjustBrightness(hex, percent) {
+            const num = parseInt(hex.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255))
+                .toString(16).slice(1);
+        }
+
+        const houseBody = document.querySelector('.house-body');
+        if (season.name === 'Зима') {
+            houseBody.style.background = '#8B4513';
+        } else {
+            houseBody.style.background = '#A0522D';
+        }
+
+        const windows = document.querySelectorAll('.window');
+        const windowGlows = document.querySelectorAll('.window-glow');
+        if (timeOfDay === 'night' || timeOfDay === 'evening') {
+            windows.forEach(w => {
+                w.style.background = 'linear-gradient(135deg, #FFE5B4 0%, #FFD700 50%, #FFA500 100%)';
+                w.style.boxShadow = 'inset 0 0 10px rgba(255,215,0,0.5), 0 0 20px rgba(255,215,0,0.6)';
+            });
+            windowGlows.forEach(g => g.style.opacity = '1');
+        } else {
+            windows.forEach(w => {
+                w.style.background = '#87CEEB';
+                w.style.boxShadow = 'inset 0 0 10px rgba(0,0,0,0.2)';
+            });
+            windowGlows.forEach(g => g.style.opacity = '0');
+        }
+    }
+
+    function updateDateTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('date').textContent = now.toLocaleDateString('ru-RU', options);
+
+        const currentSeason = getCurrentSeason(now.getMonth());
+        const timeOfDay = getTimeOfDay(now.getHours());
+        const timeConfig = currentSeason.times[timeOfDay];
+
+        document.getElementById('season-icon').textContent = currentSeason.icon;
+        document.getElementById('season-name').textContent = currentSeason.name;
+        document.getElementById('time-period').textContent = getTimeOfDayName(timeOfDay);
+        document.getElementById('day-of-year').textContent = getDayOfYear(now);
+        document.getElementById('description').textContent = timeConfig.desc;
+
+        const currentState = `${currentSeason.name}-${timeOfDay}`;
+        if (window.lastState !== currentState) {
+            updateScene(currentSeason, timeOfDay, timeConfig);
+            updateParticles(currentSeason.particle, currentSeason.particleCount);
+            window.lastState = currentState;
+        }
+    }
+
+    createClouds();
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    window.addEventListener('resize', () => {
+        const now = new Date();
+        const currentSeason = getCurrentSeason(now.getMonth());
+        updateParticles(currentSeason.particle, currentSeason.particleCount);
+    });
+</script>
+</body>
+</html>
