@@ -1,177 +1,354 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивная визуализация времени и сезонов | Динамичный календарь природы и суток</title>
-    <meta name="description" content="Интерактивная анимация времени суток и сезонов года: наблюдайте за сменой дня и ночи, весны, лета, осени и зимы в реальном времени.">
-    <meta name="keywords" content="визуализация времени суток, сезоны года, интерактивный календарь, анимация природы, смена сезонов, день и ночь, динамичная графика">
-    <link rel="canonical" href="https://a1d0s-8711.github.io/">
-    <link rel="alternate" hreflang="ru" href="https://a1d0s-8711.github.io/">
-    <meta property="og:title" content="Интерактивная визуализация времени и сезонов | Динамичный календарь">
-    <meta property="og:description" content="Погрузитесь в динамичную анимацию смены сезонов и времени суток. Идеально для образования и релакса.">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Дата и время — элегантный вид</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1: #0f172a; /* deep navy */
+      --bg2: #07112a; /* darker */
+      --glass: rgba(255,255,255,0.06);
+      --accent: #7c5cff;
+      --accent-2: #00d4ff;
+      --text: rgba(255,255,255,0.95);
+      --muted: rgba(255,255,255,0.65);
+      --card-radius: 18px;
+      --blur: 12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,92,255,0.14), transparent),
+                  radial-gradient(900px 400px at 90% 90%, rgba(0,212,255,0.06), transparent),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+    }
+
+    .stage{
+      width:100%;
+      max-width:980px;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:28px;
+      align-items:center;
+    }
+
+    /* Left hero */
+    .hero{
+      padding:34px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: var(--card-radius);
+      backdrop-filter: blur(var(--blur));
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:before{
+      content:'';
+      position:absolute;
+      inset: -40% -20% auto auto;
+      width:420px;height:420px;
+      background: radial-gradient(closest-side, var(--accent), transparent 60%);
+      filter: blur(60px);
+      opacity:0.9;
+      transform: translate(-30%,-30%) rotate(12deg);
+      pointer-events:none;
+    }
+
+    h1{
+      margin:0 0 8px 0;
+      font-size:34px;
+      line-height:1.02;
+      font-weight:800;
+      letter-spacing:-0.02em;
+      color:var(--text);
+    }
+    p.lead{
+      margin:0 0 22px 0;
+      color:var(--muted);
+      font-weight:400;
+      font-size:15px;
+    }
+
+    .time-large{
+      display:flex;
+      align-items:baseline;
+      gap:18px;
+    }
+    .clock{
+      font-size:68px;
+      font-weight:800;
+      line-height:1;
+      letter-spacing:-0.02em;
+    }
+    .ampm{
+      font-size:18px;
+      margin-top:8px;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .meta-row{
+      display:flex;
+      gap:18px;
+      margin-top:18px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:600;
+      color:var(--muted);
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(6px);
+    }
+
+    /* Right sidebar */
+    .sidebar{
+      padding:20px;
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 0 6px 20px rgba(2,6,23,0.55);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      min-height:220px;
+    }
+    .tz-item{
+      display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .tz-item strong{font-weight:700}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* controls */
+    .controls{display:flex;gap:10px;align-items:center}
+    .toggle{
+      appearance:none;outline:none;border:0;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;box-shadow:0 6px 18px rgba(124,92,255,0.18);
+    }
+    .select{padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);font-weight:600}
+
+    /* footer small */
+    .foot{margin-top:18px;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media (max-width:880px){
+      .stage{grid-template-columns:1fr;}
+      .time-large{flex-direction:row;gap:12px}
+      .clock{font-size:54px}
+    }
+  </style>
 </head>
 <body>
-<div class="scene">
-    <div class="sky" id="sky">
-        <div id="celestial-body"></div>
-        <div id="stars-container"></div>
-        <div id="clouds-container"></div>
-        <div id="lightning-container"></div>
-        <div id="rain-container"></div> <!-- Новый контейнер для дождя -->
-        <div id="snow-container"></div> <!-- Новый контейнер для снега -->
-    </div>
-    <div class="ground" id="ground"></div>
-    <div class="path" id="path">
-        <div class="path-stone" style="width: 15px; height: 12px; bottom: 10%; left: 45%;"></div>
-        <div class="path-stone" style="width: 12px; height: 10px; bottom: 25%; left: 50%;"></div>
-        <div class="path-stone" style="width: 14px; height: 11px; bottom: 40%; left: 48%;"></div>
-        <div class="path-stone" style="width: 13px; height: 12px; bottom: 55%; left: 51%;"></div>
-        <div class="path-stone" style="width: 16px; height: 13px; bottom: 70%; left: 49%;"></div>
-    </div>
-    <div class="fence fence-left">
-        <div class="fence-section">
-            <div class="fence-post fence-post-left"></div>
-            <div class="fence-post fence-post-right"></div>
-            <div class="fence-rail fence-rail-top"></div>
-            <div class="fence-rail fence-rail-middle"></div>
-            <div class="fence-rail fence-rail-bottom"></div>
-        </div>
-        <div class="fence-section">
-            <div class="fence-post fence-post-left"></div>
-            <div class="fence-post fence-post-right"></div>
-            <div class="fence-rail fence-rail-top"></div>
-            <div class="fence-rail fence-rail-middle"></div>
-            <div class="fence-rail fence-rail-bottom"></div>
-        </div>
-    </div>
-    <div class="fence fence-right">
-        <div class="fence-section">
-            <div class="fence-post fence-post-left"></div>
-            <div class="fence-post fence-post-right"></div>
-            <div class="fence-rail fence-rail-top"></div>
-            <div class="fence-rail fence-rail-middle"></div>
-            <div class="fence-rail fence-rail-bottom"></div>
-        </div>
-        <div class="fence-section">
-            <div class="fence-post fence-post-left"></div>
-            <div class="fence-post fence-post-right"></div>
-            <div class="fence-rail fence-rail-top"></div>
-            <div class="fence-rail fence-rail-middle"></div>
-            <div class="fence-rail fence-rail-bottom"></div>
-        </div>
-    </div>
-    <div class="garden" id="garden"></div>
-    <div class="house">
-        <div class="chimney"></div>
-        <div class="smoke"></div>
-        <div class="smoke" style="animation-delay: 1.3s;"></div>
-        <div class="smoke" style="animation-delay: 2.6s;"></div>
-        <div class="house-roof"></div>
-        <div class="house-body">
-            <div class="window window-left">
-                <div class="window-glow"></div>
-            </div>
-            <div class="window window-right">
-                <div class="window-glow"></div>
-            </div>
-            <div class="door">
-                <div class="door-knob"></div>
-            </div>
-        </div>
-    </div>
-    <div class="tree" style="right: 55%; bottom: 30%;">
-        <div class="tree-trunk"></div>
-        <div class="tree-crown">
-            <div class="pine-layer pine-layer-1"></div>
-            <div class="pine-layer pine-layer-2"></div>
-            <div class="pine-layer pine-layer-3"></div>
-            <div class="pine-layer pine-layer-4"></div>
-            <div class="pine-layer pine-layer-5"></div>
-        </div>
-    </div>
-    <div class="tree" style="right: 10%; bottom: 30%;">
-        <div class="tree-trunk"></div>
-        <div class="tree-crown">
-            <div class="pine-layer pine-layer-1"></div>
-            <div class="pine-layer pine-layer-2"></div>
-            <div class="pine-layer pine-layer-3"></div>
-            <div class="pine-layer pine-layer-4"></div>
-            <div class="pine-layer pine-layer-5"></div>
-        </div>
-    </div>
-</div>
-<div id="particles-container"></div>
-<!-- Панель настроек -->
-<div class="settings-panel" id="settingsPanel">
-    <button class="settings-toggle" id="settingsToggle">⚙️</button>
-    <div class="settings-content" id="settingsContent">
-        <h3>Настройки</h3>
-        <label for="animationSpeed">Скорость анимации:</label>
-        <input type="range" id="animationSpeed" min="0.1" max="2" value="1" step="0.1">
+  <main class="stage" role="main">
+    <section class="hero" aria-labelledby="title">
+      <h1 id="title">Текущее время</h1>
+      <p class="lead">Красивый, легко читаемый блок с датой и временем. Автоматическое обновление каждую секунду.</p>
 
-        <label for="particleIntensity">Интенсивность частиц:</label>
-        <input type="range" id="particleIntensity" min="0" max="1" value="1" step="0.1">
+      <div class="time-large">
+        <div>
+          <div class="clock" id="time">--:--:--</div>
+          <div class="ampm" id="ampm">—</div>
+        </div>
+        <div style="min-width:200px">
+          <div class="pill" id="date">Загрузка даты...</div>
+          <div class="pill" id="weekday" style="margin-top:10px">—</div>
+        </div>
+      </div>
 
-        <label for="weatherType">Тип погоды:</label>
-        <select id="weatherType">
-            <option value="default">По умолчанию</option>
-            <option value="rain">Дождь</option>
-            <option value="snow">Снег</option>
-            <option value="storm">Гроза</option>
+      <div class="meta-row" style="margin-top:22px">
+        <div class="pill" id="tzname">Часовой пояс: —</div>
+        <div class="pill" id="offset">UTC —</div>
+        <div class="pill" id="locale">Локализация: ru-RU</div>
+      </div>
+
+      <div class="foot">Сохраните файл как <strong>index.html</strong> и откройте его в браузере. Поддерживается офлайн.</div>
+    </section>
+
+    <aside class="sidebar" aria-label="Параметры и дополнительные данные">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="small">Формат времени</div>
+          <div style="font-weight:700">12/24</div>
+        </div>
+        <div class="controls">
+          <button class="toggle" id="toggleFormat">24</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="small">Локаль отображения</div>
+        <select class="select" id="localeSelect">
+          <option value="ru-RU">Русский (ru-RU)</option>
+          <option value="en-US">English (en-US)</option>
+          <option value="kk-KZ">Қазақша (kk-KZ)</option>
+          <option value="auto">Браузерная локаль</option>
         </select>
+      </div>
 
-        <label for="soundToggle">Звуковое сопровождение:</label>
-        <input type="checkbox" id="soundToggle">
-    </div>
-</div>
-<!-- /Панель настроек -->
-<div class="content">
-    <div class="left-panel">
-        <div class="time-display">
-            <div id="clock">00:00:00</div>
-            <div id="date">Загрузка...</div>
+      <div class="tz-item">
+        <div>
+          <div class="small">Имя часового пояса</div>
+          <strong id="tzFull">—</strong>
         </div>
-        <div class="info-cards">
-            <div class="info-card">
-                <div class="info-icon" id="season-icon">🍂</div>
-                <div class="info-content">
-                    <div class="info-label">Сезон</div>
-                    <div class="info-value" id="season-name">Осень</div>
-                </div>
-            </div>
-            <div class="info-card">
-                <div class="info-icon" id="time-icon">🌅</div>
-                <div class="info-content">
-                    <div class="info-label">Время суток</div>
-                    <div class="info-value" id="time-period">Утро</div>
-                </div>
-            </div>
-            <div class="info-card">
-                <div class="info-icon">🗓️️</div>
-                <div class="info-content">
-                    <div class="info-label">День года</div>
-                    <div class="info-value" id="day-of-year">1</div>
-                </div>
-            </div>
+        <div style="text-align:right">
+          <div class="small">Локальное время</div>
+          <div id="localShort">—</div>
         </div>
-        <div class="season-description" id="description">
-            Наблюдайте, как меняется атмосфера в зависимости от времени суток и сезона
+      </div>
+
+      <div class="tz-item">
+        <div>
+          <div class="small">Смещение UTC</div>
+          <strong id="utcOffset">—</strong>
         </div>
-        <div class="season-progress">
-            <div class="progress-label">До следующего сезона</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="progress-bar"></div>
-                <div class="progress-text" id="progress-text">0%</div>
-            </div>
-            <div class="next-season" id="next-season">Следующий: Зима ❄️</div>
+        <div>
+          <div class="small">Секунд сейчас</div>
+          <strong id="secs">—</strong>
         </div>
-    </div>
-    <div class="right-panel">
-        <!-- Визуальная сцена справа -->
-    </div>
-</div>
-<script src="script.js"></script>
+      </div>
+
+      <div class="small" style="opacity:0.9">Поддержка: JavaScript использует объект <code>Intl.DateTimeFormat</code> — корректно показывает локализованные имена месяцев и дней.</div>
+    </aside>
+  </main>
+
+  <script>
+    // --- Настройки и состояние
+    const elTime = document.getElementById('time');
+    const elAmpm = document.getElementById('ampm');
+    const elDate = document.getElementById('date');
+    const elWeekday = document.getElementById('weekday');
+    const elTz = document.getElementById('tzname');
+    const elOffset = document.getElementById('offset');
+    const elLocale = document.getElementById('locale');
+    const elToggle = document.getElementById('toggleFormat');
+    const elLocaleSelect = document.getElementById('localeSelect');
+    const elTzFull = document.getElementById('tzFull');
+    const elLocalShort = document.getElementById('localShort');
+    const elUtcOffset = document.getElementById('utcOffset');
+    const elSecs = document.getElementById('secs');
+
+    // default settings
+    let use24 = true;
+    let locale = 'ru-RU';
+
+    // allow 'auto' to select browser default
+    function getEffectiveLocale(){
+      if(locale === 'auto') return navigator.language || 'en-US';
+      return locale;
+    }
+
+    // format time parts with leading zero
+    function z(n){return n<10? '0'+n: String(n)}
+
+    function updateOnce(){
+      const now = new Date();
+      const efLocale = getEffectiveLocale();
+
+      // time
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      elSecs.textContent = seconds;
+
+      let ampmText = '';
+      if(!use24){
+        ampmText = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12; // convert 0 -> 12
+      }
+
+      elTime.textContent = `${z(hours)}:${z(minutes)}:${z(seconds)}`;
+      elAmpm.textContent = use24 ? '' : ampmText;
+
+      // localized date and weekday using Intl
+      try{
+        const dfDate = new Intl.DateTimeFormat(efLocale, { year:'numeric', month:'long', day:'numeric' });
+        const dfWeek = new Intl.DateTimeFormat(efLocale, { weekday:'long' });
+        elDate.textContent = dfDate.format(now);
+        elWeekday.textContent = dfWeek.format(now);
+
+        // timezone name & offset. Not all browsers provide .timeZoneName long, so we try fallback.
+        const tzName = Intl.DateTimeFormat(efLocale, { timeZoneName: 'long' }).formatToParts(now).find(p=>p.type==='timeZoneName')?.value || Intl.DateTimeFormat().resolvedOptions().timeZone || '—';
+        elTz.textContent = `Часовой пояс: ${tzName}`;
+        elTzFull.textContent = tzName;
+      }catch(e){
+        elDate.textContent = now.toLocaleDateString();
+        elWeekday.textContent = now.toLocaleString().split(',')[0];
+        elTz.textContent = 'Часовой пояс: —';
+        elTzFull.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || '—';
+      }
+
+      // offset in hours
+      const offsetMin = -now.getTimezoneOffset(); // minutes east of UTC
+      const sign = offsetMin>=0?'+':'-';
+      const absMin = Math.abs(offsetMin);
+      const offH = Math.floor(absMin/60);
+      const offM = absMin%60;
+      elOffset.textContent = `UTC ${sign}${z(offH)}:${z(offM)}`;
+      elUtcOffset.textContent = `${sign}${z(offH)}:${z(offM)}`;
+
+      elLocale.textContent = `Локализация: ${efLocale}`;
+
+      // short local time sample
+      elLocalShort.textContent = now.toLocaleTimeString(efLocale, {hour:'numeric',minute:'numeric'});
+    }
+
+    // Start ticking every 1s. Use requestAnimationFrame around setTimeout for smoother scheduling
+    (function startTick(){
+      function tick(){
+        updateOnce();
+        // calculate ms until next second
+        const now = performance.now();
+        const untilNext = 1000 - (Date.now() % 1000);
+        setTimeout(tick, untilNext);
+      }
+      tick();
+    })();
+
+    // UI interactions
+    elToggle.addEventListener('click', ()=>{
+      use24 = !use24;
+      elToggle.textContent = use24 ? '24' : '12';
+      updateOnce();
+    });
+
+    elLocaleSelect.addEventListener('change', (e)=>{
+      locale = e.target.value;
+      updateOnce();
+    });
+
+    // initialize values from browser
+    (function init(){
+      const browserLocale = navigator.language || 'ru-RU';
+      elLocaleSelect.value = 'ru-RU';
+      locale = 'ru-RU';
+      elToggle.textContent = use24 ? '24' : '12';
+      updateOnce();
+    })();
+
+    // Accessibility: update document title periodically so it reflects current time for assistive tech
+    setInterval(()=>{
+      document.title = `Время — ${elTime.textContent} ${elAmpm.textContent}`;
+    }, 1000);
+  </script>
 </body>
 </html>
